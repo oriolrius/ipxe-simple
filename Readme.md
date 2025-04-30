@@ -10,6 +10,7 @@ Easy iPXE Building from source code
     *   [Intel I225-V Support](#intel-i225-v-support)
 *   [Step 3: Build the project](#step-3-build-the-project)
 *   [Build Outputs (`builds/` folder)](#build-outputs-builds-folder)
+*   [Credits](#credits)
 *   [License](#license)
 
 ### You need Docker installed for this project!
@@ -106,6 +107,12 @@ The `renew.sh` script generates various iPXE boot files in the `builds/` directo
 *   **Other Formats:**
     *   `ipxe.dsk`: Floppy disk image for Legacy BIOS systems.
     *   `ipxe.lkrn`: Linux kernel format image, bootable by some Linux bootloaders (e.g., SYSLINUX) on Legacy BIOS systems.
+
+## Credits
+
+This project is based on the work from the original repository: [https://github.com/sebaxakerhtc/ipxe-simple](https://github.com/sebaxakerhtc/ipxe-simple).
+
+Many thanks to the original author, [sebaxakerhtc](https://github.com/sebaxakerhtc), for their work.
 
 ## License
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
