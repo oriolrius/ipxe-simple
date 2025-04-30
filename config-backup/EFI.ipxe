@@ -1,4 +1,18 @@
 #!ipxe
+
+prompt --key 0x04 --timeout 10000 Press Ctrl-D for debug menu... && goto debug_mode ||
+
+# Default boot path: Get network via DHCP and chainload filename (expecting HTTP URL)
+echo Attempting DHCP...
+dhcp && isset ${filename} && echo Booting from ${filename}... && chain --autofree ${filename} || goto failed_boot
+
+# If chainloading fails or DHCP/filename fails, offer debug mode or exit
+:failed_boot
+echo Default boot failed (DHCP or chainload error).
+prompt --timeout 10000 Press any key to enter debug mode or wait to exit... && goto debug_mode || goto end_script
+
+# --- Debug Mode Start ---
+:debug_mode
 cpuid --ext 29 && set arch x64 || set arch x86
 cpuid --ext 29 && set archl amd64 || set archl i386
 cpair --foreground 7 0
@@ -136,3 +150,6 @@ goto start-menu
 echo Continuing BIOS boot order...
 sleep 1
 exit 0
+
+:end_script
+exit

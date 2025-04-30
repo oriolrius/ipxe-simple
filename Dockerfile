@@ -1,43 +1,40 @@
-FROM ubuntu
-MAINTAINER Alexander Sorokin <sebastian.sorokin@gmail.com>
+FROM ubuntu:22.04
 
-## Upgrade existing packages
-RUN apt-get update && apt-get -y upgrade
+LABEL maintainer="Alexander Sorokin <sebastian.sorokin@gmail.com>"
+LABEL description="Build environment with necessary tools and scripts."
 
-## For apt to be noninteractive
-ENV DEBIAN_FRONTEND noninteractive
-ENV DEBCONF_NONINTERACTIVE_SEEN true
+ENV DEBIAN_FRONTEND=noninteractive
+ENV DEBCONF_NONINTERACTIVE_SEEN=true
 
-## Install packages
-RUN apt-get install -y apache2 gcc binutils make perl liblzma-dev mtools syslinux isolinux git xorriso cron
+# Update apt cache, install build dependencies and git in a single layer
+# Use --no-install-recommends to minimize image size
+# Clean up apt cache afterwards to reduce layer size
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    git \
+    gcc \
+    binutils \
+    make \
+    perl \
+    liblzma-dev \
+    libc6-dev \
+    isolinux \
+    syslinux \
+    xorriso \
+    mtools \
+    && rm -rf /var/lib/apt/lists/*
 
-## Prepare html
-RUN rm /var/www/html/index.html
-ADD html/ /var/www/html/
-RUN mkdir /var/www/html/bin
+# Set the working directory for subsequent instructions
+# Using a dedicated directory like /app is better practice than using /
+WORKDIR /
 
-## Adding scripts and files
-ADD config-backup /config-backup
-ADD renew.sh /renew.sh
-RUN chmod +x /renew.sh
+# Copy configuration and scripts into the working directory
+# Ensure these files exist in the build context (same directory as Dockerfile)
+COPY config-backup ./config-backup
+COPY renew.sh ./
 
-# Copy renew file to the cron.d directory
-COPY renew /etc/cron.d/renew
- 
-# Give execution rights on the cron job
-RUN chmod 0644 /etc/cron.d/renew
+# Make the script executable
+RUN chmod +x ./renew.sh
 
-# Apply cron job
-RUN crontab /etc/cron.d/renew
-
-# Clone repo for script to work for the first time
-RUN git clone git://git.ipxe.org/ipxe.git
-
-# Build latest images
-RUN /renew.sh
-
-## Expose ports.
-EXPOSE 80
-
-## Run apache2
-CMD /usr/sbin/cron start && /usr/sbin/apache2ctl -D FOREGROUND
+RUN mkdir /builds
+RUN mkdir /ipxe
